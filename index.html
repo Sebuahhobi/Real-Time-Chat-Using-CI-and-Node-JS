@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://localhost/nodejs/assets/js/jquery.min.js"></script>
+
+    <title>Node JS</title>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-8">
+          <form id="messageForm">
+            <div class="card" id="chat"></div>
+            <div class="form-group">
+              <label for="exampleFormControlTextarea1">Chat</label>
+              <textarea class="form-control" id="message" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <input type="submit" class="btn btn-primary" value="Send">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <script>
+      $(document).ready(function(){
+        $(function(){
+          $.ajaxSetup({
+            type     : "get",
+            dataType : 'json',
+            url      : "http://localhost:80/nodejs/chat/get_chat",
+            cache    : false,
+          });
+          $.ajax({
+            data    : {tahun:''},
+            success : function(hasil){
+              console.log(hasil);
+              var i=0;          
+              hasil.text.forEach(function(obj){
+                var type = 'text';
+                $('#chat').append('<div class="list-group-item">'+hasil.text[i]+'</div>');
+                /*$.chatCtrl('#mychatbox2', {
+                  text: (hasil.text[i] != undefined ? hasil.text[i] : ''),
+                  picture: (hasil.position[i] == 'left' ? 'http://localhost/nodejs/template/dist/assets/img/avatar/avatar-5.png' : 'http://localhost/nodejs/template/dist/assets/img/avatar/avatar-2.png'),
+                  position: 'chat-'+hasil.position[i],
+                  type: 'send',
+                  time: hasil.waktu[i]
+                });*/
+                i++;
+              });
+            }//END success
+          })
+        });
+      });
+
+      $(function(){
+        var socket        = io.connect();
+        var chat          = $('#chat');
+        var messageForm   = $('#messageForm');
+        var message       = $('#message');
+
+        messageForm.submit(function(e){
+          e.preventDefault();
+          socket.emit('send message', message.val());
+          message.val('');
+        });
+
+        socket.on('new message', function(data){
+          chat.append('<div class="list-group-item">'+data.msg+'</div>');
+        });
+      });
+    </script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
